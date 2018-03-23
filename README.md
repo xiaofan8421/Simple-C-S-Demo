@@ -1,2 +1,4 @@
 # Simple-C-S-Demo
-Simple C/S Architecture
+Theme: Simple C/S Communication Architecture
+Test Machine: ubuntu16.04
+
