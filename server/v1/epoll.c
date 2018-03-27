@@ -57,6 +57,7 @@ int main(int argc, char**argv)
     int nClientCnt = 0;
     int nEpFd = 0;
     struct epoll_event tEv, tEvents[30]; 
+    int on = 1;
 
     nListenFd = socket(AF_INET, SOCK_STREAM, 0);
     if(SERVER_FAILURE == nListenFd)
@@ -65,6 +66,16 @@ int main(int argc, char**argv)
         printf("socket() failed!!! errno=%d\n", errno);
         return SERVER_FAILURE;
     }
+
+    nRet = setsockopt(nListenFd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
+    if(SERVER_FAILURE == nRet)
+    {
+        perror("setsockopt()");
+        printf("setsockopt() failed!!! error=%d\n", errno);
+        return SERVER_FAILURE;
+    }
+    assert(0 == nRet);
+
 
     nRet = setNonBlock(nListenFd);
     if(SERVER_FAILURE == nRet)

@@ -54,6 +54,7 @@ int main(int argc, char **argv)
     int nMaxFd = 0;
     fd_set set,rset;
     struct timeval tTime;
+    int on = 1;
 
 	nServerSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if(-1 == nServerSocket)
@@ -62,6 +63,15 @@ int main(int argc, char **argv)
         printf("socket() failed!!! error=%d\n", errno);
 		return -1;
 	}
+
+    nRet = setsockopt(nServerSocket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
+    if(-1 == nRet)
+    {
+        perror("setsockopt()");
+		printf("setsockopt() failed!!! error=%d\n", errno);
+		return -1;
+    }
+    assert(0 == nRet);
 
     memset(&tServerAddr, 0, sizeof(tServerAddr));
 	tServerAddr.sin_family = AF_INET;
