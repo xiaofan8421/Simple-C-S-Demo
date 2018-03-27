@@ -66,6 +66,7 @@ int main(int argc, char **argv)
     {
         rset = set;
         nRet = select(nMaxFd+1, &rset, NULL, NULL, NULL);
+        //nRet = select(nMaxFd+1, &rset, NULL, NULL, &tTime);
         if(0 > nRet)
         {
             printf("select failed!!! errno=%d\n", errno);
@@ -108,15 +109,14 @@ int main(int argc, char **argv)
                 break;
             }
 
-            printf("send len=%d\n", nRet);
             szBuff[nRet-1] = '\0';
-            printf("Send: %s\n", szBuff);
+            printf("Send %d bytes: %s\n", nRet, szBuff);
         }
         
         if(FD_ISSET(nSocketId, &rset))
         {
             memset(szBuff, 0, sizeof(szBuff));
-            nRet = read(nSocketId, szBuff, sizeof(szBuff));
+            nRet = read(nSocketId, szBuff, sizeof(szBuff)-1);
             if(0 > nRet)
             {
                 assert(-1 == nRet);
@@ -130,9 +130,8 @@ int main(int argc, char **argv)
                 break;
             }
         
-            printf("\nrecv len=%d\n", nRet);
             szBuff[nRet-1] = '\0';
-            printf("Recv: %s\n", szBuff);
+            printf("\nRecv %d bytes: %s\n", nRet, szBuff);
 
             if(!strcmp(szBuff, "netstat -plantu"))
             {

@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 	{
         rset = set;
         nRet = select(nMaxFd+1, &rset, NULL, NULL, NULL);
-        //nRet = select(nMaxFd, &rset, NULL, NULL, &tTime);
+        //nRet = select(nMaxFd+1, &rset, NULL, NULL, &tTime);
         if(0 > nRet)
         {
             if(errno == EINTR)
@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 		    assert(nClientSocket >= 0);
 		
             nClientCount++;
-            printf("current client number:%d\n", nClientCount);
+            printf("\ncurrent client number:%d\n", nClientCount);
 		    nPort = ntohs(tClientAddr.sin_port);
 	    	inet_ntop(AF_INET, &tClientAddr.sin_addr, szIp, sizeof szIp);
 		    printf("New Connection: Client's [IP=%s], [port=%d]\n", szIp, nPort);
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
     	    	nRet = read(nClientFd, szBuff, sizeof(szBuff)-1);
     	    	if(0 == nRet)
     		    {
-    			    printf("client [ip=%s]:[port=%d] closed !!!\n", szIp, nPort);
+    			    printf("\nclient [ip=%s]:[port=%d] closed !!!\n", szIp, nPort);
                     FD_CLR(nClientFd, &set);
                     close(nClientFd);
                     nClientCount--;
@@ -201,19 +201,19 @@ int main(int argc, char **argv)
     	    	{
                     assert(-1 == nRet);
                     perror("read()");
-    			    printf("recv from client [ip=%s]:[port=%d] failed !!! errno=%d\n", szIp, nPort, errno);
+    			    printf("\nrecv from client [ip=%s]:[port=%d] failed !!! errno=%d\n", szIp, nPort, errno);
     			    continue;
     		    }
 
-                szBuff[nRet] = '\0';
-                printf("recv from client [ip=%s]:[port=%d] : %s\n", szIp, nPort, szBuff);
+                szBuff[nRet-1] = '\0';
+                printf("\nSuccessfully recv from client's [ip=%s]:[port=%d] %d bytes: %s\n", szIp, nPort, nRet, szBuff);
                 
                 if( !strcmp(szBuff, "quit") || !strcmp(szBuff, "exit"))
                 {
                     FD_CLR(nClientFd, &set);
                     close(nClientFd);
                     nClientCount--;
-                    printf("client Active closed\n");
+                    printf("\nclient Active closed\n");
                     continue;
                 }
                 
@@ -224,12 +224,12 @@ int main(int argc, char **argv)
     	    	{
                     assert(-1 == nRet);
                     perror("write()");
-    			    printf("send to client [ip=%s]:[port=%d] failed !!! errno=%d\n", szIp, nPort, errno);
+    			    printf("\nsend to client [ip=%s]:[port=%d] failed !!! errno=%d\n", szIp, nPort, errno);
     		    	break;
     		    }
                 
-                szBuff[nRet] = '\0';
-		        printf("Successfully send msg to client [ip=%s]:[port=%d]: %s\n", szIp, nPort, szBuff);
+                szBuff[nRet-1] = '\0';
+		        printf("\nSuccessfully send msg to client's [ip=%s]:[port=%d] %d bytes: %s\n", szIp, nPort, nRet, szBuff);
 	        }
         }
     }
