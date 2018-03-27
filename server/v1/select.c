@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
+#include <fcntl.h>
 
 #define MAX_ARRAY_SIZE 1024
 
@@ -62,10 +63,10 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+    memset(&tServerAddr, 0, sizeof(tServerAddr));
 	tServerAddr.sin_family = AF_INET;
 	tServerAddr.sin_port = htons(11024);
-	tServerAddr.sin_addr.s_addr = inet_addr("104.168.134.206");
-
+	tServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	nAddrLen = sizeof(tServerAddr);
 	nRet = bind(nServerSocket, (struct sockaddr*)&tServerAddr, nAddrLen); 
 	if(-1 == nRet)
@@ -101,12 +102,12 @@ int main(int argc, char **argv)
 	{
         rset = set;
         nRet = select(nMaxFd+1, &rset, NULL, NULL, NULL);
-        //nRet = select(nServerSocket, &rset, NULL, NULL, &tTime);
+        //nRet = select(nMaxFd, &rset, NULL, NULL, &tTime);
         if(0 > nRet)
         {
             if(errno == EINTR)
                 continue;
-            printf("select error\n");
+            printf("select failed!!! errno=%d\n", errno);
             continue;
         }
         else if(0 == nRet)
@@ -114,6 +115,7 @@ int main(int argc, char **argv)
             tTime.tv_sec  = 10;
             tTime.tv_usec = 0;
             printf("select timeout\n");
+            continue;
         }
 
         if(FD_ISSET(nServerSocket, &rset))
@@ -142,7 +144,7 @@ int main(int argc, char **argv)
 
         if(FD_ISSET(STDIN_FILENO, &rset))
         {
-            nRet = read(STDIN_FILENO, szBuff, sizeof(szBuff));
+            nRet = read(STDIN_FILENO, szBuff, sizeof(szBuff)-1);
             if(0 > nRet)
             {
                 printf("read STDIN_FILENO error\n");
@@ -205,15 +207,18 @@ int main(int argc, char **argv)
 
                 szBuff[nRet] = '\0';
                 printf("recv from client [ip=%s]:[port=%d] : %s\n", szIp, nPort, szBuff);
-                /*
+                
                 if( !strcmp(szBuff, "quit") || !strcmp(szBuff, "exit"))
                 {
+                    FD_CLR(nClientFd, &set);
+                    close(nClientFd);
+                    nClientCount--;
                     printf("client Active closed\n");
                     continue;
                 }
-                */
-    	    	memset(szBuff, 0, sizeof(szBuff));
-    		    strcpy(szBuff, "hello world!");
+                
+    	    	//memset(szBuff, 0, sizeof(szBuff));
+    		    //strcpy(szBuff, "hello world!");
     		    nRet = write(nClientSocket, szBuff, strlen(szBuff));
     		    if(0 > nRet)
     	    	{
