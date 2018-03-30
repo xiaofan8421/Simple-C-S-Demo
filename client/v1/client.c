@@ -110,7 +110,7 @@ int main(int argc, char **argv)
             }
 
             szBuff[nRet-1] = '\0';
-            printf("Send %d bytes: %s\n", nRet, szBuff);
+            printf("\nSend %d bytes: %s\n", nRet, szBuff);
         }
         
         if(FD_ISSET(nSocketId, &rset))
@@ -127,11 +127,13 @@ int main(int argc, char **argv)
             else if(0 == nRet)
             {
                 printf("disconnected to server!!!\n");
+                FD_CLR(nSocketId, &set);
+                //close(nSocketId);
                 break;
             }
         
-            szBuff[nRet-1] = '\0';
-            printf("\nRecv %d bytes: %s\n", nRet, szBuff);
+            szBuff[nRet] = '\0';
+            printf("Recv %d bytes: %s\n", nRet, szBuff);
 
             if(!strcmp(szBuff, "netstat -plantu"))
             {

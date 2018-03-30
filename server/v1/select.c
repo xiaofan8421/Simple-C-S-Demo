@@ -227,8 +227,8 @@ int main(int argc, char **argv)
                     continue;
                 }
                 
-    	    	//memset(szBuff, 0, sizeof(szBuff));
-    		    //strcpy(szBuff, "hello world!");
+    	        memset(szBuff, 0, sizeof(szBuff));
+    		    strcpy(szBuff, "hello client! I'm select server");
     		    nRet = write(nClientSocket, szBuff, strlen(szBuff));
     		    if(0 > nRet)
     	    	{
@@ -238,7 +238,7 @@ int main(int argc, char **argv)
     		    	break;
     		    }
                 
-                szBuff[nRet-1] = '\0';
+                szBuff[nRet] = '\0';
 		        printf("\nSuccessfully send msg to client's [ip=%s]:[port=%d] %d bytes: %s\n", szIp, nPort, nRet, szBuff);
 	        }
         }
