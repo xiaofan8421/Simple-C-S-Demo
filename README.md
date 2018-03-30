@@ -1,6 +1,6 @@
 # Simple-C-S-Demo
 
-Theme: Simple C/S Communication Architecture
+Theme: Simple C/S Communication Architecture（Socket Network）
 
 Language： V1(C) V2(C++)
 
