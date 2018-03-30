@@ -1,11 +1,12 @@
-#ifndef TCPSOCKET_H
-#define TCPSOCKET_H
+#ifndef TCP_SOCKET_H
+#define TCP_SOCKET_H
 
 #include "fxltype.h"
+#include "fxlthread.h"
 
-#ifdef _LINUX_
+//#ifdef _LINUX_
 typedef int SOCKET;
-#endif
+//#endif
 
 #define INVALID_SOCKET (-1)
 #define MAX_BUF_LEN 1024
@@ -53,4 +54,4 @@ private:
     TIOBuffer m_tIoBuf;
 };
 
-#endif //TCPSOCKET_H
+#endif //TCP_SOCKET_H
