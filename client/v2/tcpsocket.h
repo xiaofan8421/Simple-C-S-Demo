@@ -24,7 +24,7 @@ public:
     CTcpSocket();
     virtual ~CTcpSocket();
 
-    BOOL32 Create(u32 dwSvrIp, u16 wSvrPort, pFuncRcvDataCB pRcvDataCb, void *pContent);
+    BOOL32 Create(const s8 *szSvrIp, u16 wSvrPort, pFuncRcvDataCB pRcvDataCb, void *pContent);
 
     void Destroy();
 

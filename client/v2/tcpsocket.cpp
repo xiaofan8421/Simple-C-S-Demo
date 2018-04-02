@@ -17,7 +17,7 @@ CTcpSocket::~CTcpSocket()
     Destroy();
 }
 
-BOOL32 CTcpSocket::Create(u32 dwSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvDataCb, void *pContent)
+BOOL32 CTcpSocket::Create(const s8 *szSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvDataCb, void *pContent)
 {
     m_pRcvDataCB = pRcvDataCb;
     m_pUsrContent = pContent;
@@ -33,7 +33,8 @@ BOOL32 CTcpSocket::Create(u32 dwSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvDataCb,
     memset(&tServer, 0, sizeof(tServer));
     tServer.sin_family = AF_INET;
     tServer.sin_port = dwSvrPort;
-    tServer.sin_addr.s_addr = dwSvrIp;
+    //tServer.sin_addr.s_addr = dwSvrIp;
+    inet_pton(AF_INET, szSvrIp, &tServer.sin_addr.s_addr);
 
     s32 nRet = connect(m_nSocket, (struct sockaddr *)&tServer, sizeof(tServer));
     if(INVALID_SOCKET == nRet)
