@@ -32,9 +32,9 @@ BOOL32 CTcpSocket::Create(const s8 *szSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvD
     struct sockaddr_in tServer;
     memset(&tServer, 0, sizeof(tServer));
     tServer.sin_family = AF_INET;
-    tServer.sin_port = dwSvrPort;
+    tServer.sin_port = htons(dwSvrPort);
     //tServer.sin_addr.s_addr = dwSvrIp;
-    inet_pton(AF_INET, szSvrIp, &tServer.sin_addr.s_addr);
+    inet_pton(AF_INET, "104.168.134.206", &tServer.sin_addr.s_addr);
 
     s32 nRet = connect(m_nSocket, (struct sockaddr *)&tServer, sizeof(tServer));
     if(INVALID_SOCKET == nRet)

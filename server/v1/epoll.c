@@ -177,7 +177,7 @@ int main(int argc, char**argv)
 
                 if(SERVER_FAILURE == nConnFd)
                 {
-                    if(errno!=EINTR && errno!=EAGAIN || errno!=ECONNABORTED)
+                    if(errno!=EINTR || errno!=EAGAIN || errno!=ECONNABORTED)
                     {
                         perror("accept()");
                         printf("accept() failed!!! errno=%d\n", errno);
