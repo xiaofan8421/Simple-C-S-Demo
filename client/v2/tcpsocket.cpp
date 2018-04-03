@@ -34,7 +34,7 @@ BOOL32 CTcpSocket::Create(const s8 *szSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvD
     tServer.sin_family = AF_INET;
     tServer.sin_port = htons(dwSvrPort);
     //tServer.sin_addr.s_addr = dwSvrIp;
-    inet_pton(AF_INET, "104.168.134.206", &tServer.sin_addr.s_addr);
+    inet_pton(AF_INET, szSvrIp, &tServer.sin_addr.s_addr);
 
     s32 nRet = connect(m_nSocket, (struct sockaddr *)&tServer, sizeof(tServer));
     if(INVALID_SOCKET == nRet)
@@ -45,6 +45,7 @@ BOOL32 CTcpSocket::Create(const s8 *szSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvD
         return FALSE;
     }
 
+    printf("connect success! \n");
     SetSocketOption(m_nSocket, TRUE);
 
     m_bRun = TRUE;
@@ -52,6 +53,7 @@ BOOL32 CTcpSocket::Create(const s8 *szSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvD
     if(NULL == m_hThd)
     {
         m_bRun = FALSE;
+        printf("create thread failed!!! \n");
         Destroy();
         return FALSE;
     }
@@ -85,6 +87,7 @@ BOOL32 CTcpSocket::SendMsg(const s8 *pCmd, u16 wLen)
         return FALSE;
     }
 
+    printf("snd %d msgs:%s\n", wLen, pCmd);
     s32 nRet = send(m_nSocket, pCmd, wLen, 0);
     if(nRet != wLen)
     {

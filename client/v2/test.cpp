@@ -39,8 +39,12 @@ int main(int argc, char **argv)
 
     s8 achTmp[30] = "my name is client";
     pCTcpSocket->SendMsg(achTmp, strlen(achTmp));
-    delete pCTcpSocket;
-    pCTcpSocket = NULL;
+
+    //pCTcpSocket->Destroy();
+    //delete pCTcpSocket;
+    //pCTcpSocket = NULL;
+
+    sleep(200);
 
     return 0;
 }
