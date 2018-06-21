@@ -105,15 +105,16 @@ int main(int argc, char **argv)
     if(nMaxFd < nServerSocket)
         nMaxFd = nServerSocket;
 
-    tTime.tv_sec  = 10;
-    tTime.tv_usec = 0;
-
 	for(;;)
 	{
+	FD_ZERO(&set);
+    	FD_SET(nMaxFd, &set);
         rset = set;
 	//nRet = select(nMaxFd+1, &rset, NULL, NULL, -1); //非阻塞调用select
         //nRet = select(nMaxFd+1, &rset, NULL, NULL, NULL); //阻塞调用select
-        nRet = select(nMaxFd+1, &rset, NULL, NULL, &tTime);
+	tTime.tv_sec  = 10;
+    	tTime.tv_usec = 0;
+        nRet = select(nMaxFd+1, &rset, NULL, NULL, &tTime);	//设定10秒阻塞超时，超时后仍没有可读事件则返回0
         if(0 > nRet)
         {
             if(errno == EINTR)
@@ -123,8 +124,8 @@ int main(int argc, char **argv)
         }
         else if(0 == nRet)
         {
-            tTime.tv_sec  = 10;
-            tTime.tv_usec = 0;
+            //tTime.tv_sec  = 10;
+            //tTime.tv_usec = 0;
             printf("select timeout\n");
             continue;
         }
