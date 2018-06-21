@@ -111,7 +111,8 @@ int main(int argc, char **argv)
 	for(;;)
 	{
         rset = set;
-        //nRet = select(nMaxFd+1, &rset, NULL, NULL, NULL); //非阻塞调用select
+	//nRet = select(nMaxFd+1, &rset, NULL, NULL, -1); //非阻塞调用select
+        //nRet = select(nMaxFd+1, &rset, NULL, NULL, NULL); //阻塞调用select
         nRet = select(nMaxFd+1, &rset, NULL, NULL, &tTime);
         if(0 > nRet)
         {
