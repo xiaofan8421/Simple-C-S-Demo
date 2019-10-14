@@ -14,7 +14,7 @@
 #include <errno.h> // errno
 #include <sys/select.h> // select
 #include <sys/time.h> // select
-
+#include <netinet/tcp.h> // for TCP_NODELAY
 
 //
 #define VERSION         "0.1.0"
@@ -99,6 +99,12 @@ static int set_socket_option(int socket_fd)
 {
     int ret = -1;
 
+    const char opt = 1;
+    ret = setsockopt(socket_fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(char));
+    if (-1 == ret) {
+        goto EXIT;
+    }
+    /*
     // if need to set socket buf size
     uint64_t socket_buf_size = 64*1024*1024;  //64 MB
     ret = setsockopt(socket_fd, SOL_SOCKET, SO_RCVBUF, &socket_buf_size, \
@@ -108,6 +114,7 @@ static int set_socket_option(int socket_fd)
                                                         errno, strerror(errno));
         goto EXIT;
     }
+    */
     /*
     // if udp, no need for, udp has no snd buffer.
     ret = setsockopt(socket_fd, SOL_SOCKET, SO_SNDBUF, &socket_buf_size, \
