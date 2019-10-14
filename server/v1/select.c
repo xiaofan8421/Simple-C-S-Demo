@@ -162,7 +162,7 @@ int main(int argc, char **argv)
     if (nMaxFd < nServerSocket)
         nMaxFd = nServerSocket;
 
-    for (;;)
+    while (g_running)
     {
         rset = set;
         //nRet = select(nMaxFd+1, &rset, NULL, NULL, -1); //非阻塞调用select
