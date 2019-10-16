@@ -95,19 +95,21 @@ static int check_ip_addr(const char *in_ip)
     return -1;
 }
 
-static int set_socket_option(int socket_fd)
+static int set_socket_option(int sock_fd)
 {
     int ret = -1;
+    const int opt = 1;
 
-    const char opt = 1;
-    ret = setsockopt(socket_fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(char));
+    ret = setsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
     if (-1 == ret) {
+        printf("[set_sock_opt]: set TCP_NODELAY failed! errno=%u, err=%s \n", \
+                                                        errno, strerror(errno));
         goto EXIT;
     }
     /*
     // if need to set socket buf size
     uint64_t socket_buf_size = 64*1024*1024;  //64 MB
-    ret = setsockopt(socket_fd, SOL_SOCKET, SO_RCVBUF, &socket_buf_size, \
+    ret = setsockopt(sock_fd, SOL_SOCKET, SO_RCVBUF, &socket_buf_size, \
                      sizeof(socket_buf_size));
     if (-1 == ret) {
         printf("[set_sock_opt]: set SO_RCVBUF 64M failed! errno=%u, err=%s \n", \
@@ -117,7 +119,7 @@ static int set_socket_option(int socket_fd)
     */
     /*
     // if udp, no need for, udp has no snd buffer.
-    ret = setsockopt(socket_fd, SOL_SOCKET, SO_SNDBUF, &socket_buf_size, \
+    ret = setsockopt(sock_fd, SOL_SOCKET, SO_SNDBUF, &socket_buf_size, \
                      sizeof(socket_buf_size));
     if (-1 == ret) {
         printf("[set_sock_opt]: set SO_SNDBUF 64M failed! errno=%u, err=%s \n", \
@@ -127,8 +129,7 @@ static int set_socket_option(int socket_fd)
     */
 
     // reuse tcp server port for multi-thread perf improving!
-    int flag = 1;
-    ret = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEPORT, &flag, sizeof(flag));
+    ret = setsockopt(sock_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
     if (-1 == ret) {
         printf("[set_sock_opt]: set SO_REUSEPORT failed! errno=%u, err=%s \n", \
                                                         errno, strerror(errno));
@@ -139,27 +140,27 @@ EXIT:
     return ret;
 }
 
-static int set_non_block(int socket_fd)
+static int set_non_block(int sock_fd)
 {
-    int opts = -1;
+    int opt = -1;
 
-    opts = fcntl(socket_fd, F_GETFL);
-    if(-1 == opts) {
+    opt = fcntl(sock_fd, F_GETFL);
+    if(-1 == opt) {
         printf("[set_non_block]: F_GETFL failed! errno=%u, err=%s \n", \
                                                 errno, strerror(errno));
         goto EXIT;
     }
 
-    opts |= O_NONBLOCK; 
-    opts = fcntl(socket_fd, F_SETFL, opts);
-    if(-1 == opts) {
+    opt |= O_NONBLOCK; 
+    opt = fcntl(sock_fd, F_SETFL, opt);
+    if(-1 == opt) {
         printf("[set_non_block]: F_SETFL failed! errno=%u, err=%s \n", \
                                                 errno, strerror(errno));
         goto EXIT;
     }
 
 EXIT:
-    return opts;
+    return opt;
 }
 
 static int gen_sock_net_addr(int domain, const char *in_ip, uint16_t port, \
@@ -290,7 +291,7 @@ int main(int argc, char **argv)
 {
     int ret = -1;
     int domain = -1;
-    int socket_fd = -1; // listen or connected socket
+    int sock_fd = -1; // listen or connected socket
     int conn_fd = -1;   // established socket
     char server_ip[BUF_IP] = {0};   // server listen ip
     uint16_t server_port = 0;   // server listen port
@@ -354,8 +355,8 @@ int main(int argc, char **argv)
         goto EXIT;
     }
 
-    socket_fd = socket(domain, SOCK_STREAM, 0);
-    if (-1 == socket_fd) {
+    sock_fd = socket(domain, SOCK_STREAM, 0);
+    if (-1 == sock_fd) {
         printf("create socket failed! errno=%u, err=%s \n", \
                                     errno, strerror(errno));
         goto EXIT;
@@ -373,10 +374,10 @@ int main(int argc, char **argv)
         }
 
         if (AF_INET == domain) {
-            ret = bind(socket_fd, (struct sockaddr*)&addr4, \
+            ret = bind(sock_fd, (struct sockaddr*)&addr4, \
                        sizeof(struct sockaddr_in));
         } else if (AF_INET6 == domain) {
-            ret = bind(socket_fd, (struct sockaddr*)&addr6, \
+            ret = bind(sock_fd, (struct sockaddr*)&addr6, \
                        sizeof(struct sockaddr_in6));
         }
         if (-1 == ret) {
@@ -386,7 +387,7 @@ int main(int argc, char **argv)
         }
 
         // default backlog is 128
-        ret = listen(socket_fd, 128);
+        ret = listen(sock_fd, 128);
         if (-1 == ret) {
             printf("listen failed! errno=%u, err=%s \n", \
                                 errno, strerror(errno));
@@ -399,7 +400,7 @@ int main(int argc, char **argv)
         server_addr.sin_family = domain;
         server_addr.sin_port = htons(server_port);
         inet_pton(domain, server_ip, &server_addr.sin_addr.s_addr);
-        ret = connect(socket_fd, (struct sockaddr*)&server_addr, \
+        ret = connect(sock_fd, (struct sockaddr*)&server_addr, \
                       sizeof(server_addr));
         if (-1 == ret) {
             printf("connect failed! errno=%u, err=%s \n", \
@@ -410,7 +411,7 @@ int main(int argc, char **argv)
                             server_ip, server_port);
     }
 
-    ret = set_non_block(socket_fd);
+    ret = set_non_block(sock_fd);
     if (-1 == ret) {
         printf("set non block failed! \n");
         goto EXIT;
@@ -421,9 +422,9 @@ int main(int argc, char **argv)
     struct timeval to;
     memset(&to, 0, sizeof(to));
     FD_ZERO(&set);
-    FD_SET(socket_fd, &set);
-    if (max_fd < socket_fd) {
-        max_fd = socket_fd;
+    FD_SET(sock_fd, &set);
+    if (max_fd < sock_fd) {
+        max_fd = sock_fd;
     }
 
     while (g_running) {
@@ -445,9 +446,9 @@ int main(int argc, char **argv)
             continue;
         }
 
-        if (FD_ISSET(socket_fd, &rset)) {
+        if (FD_ISSET(sock_fd, &rset)) {
             if (is_server) {
-                conn_fd = accept(socket_fd, (struct sockaddr *)&client_addr, \
+                conn_fd = accept(sock_fd, (struct sockaddr *)&client_addr, \
                                  &addr_len);
                 if (-1 == conn_fd) {
                     printf("accept failed! error=%u, err=%s \n", \
@@ -466,15 +467,15 @@ int main(int argc, char **argv)
                 }
                 continue;
             } else { // client behavior
-                //inter_msg(socket_fd, &set); // just for test
-                safe_write(socket_fd);
+                //inter_msg(sock_fd, &set); // just for test
+                safe_write(sock_fd);
                 continue;
             }
         }
 
         for (int idx=0; idx<=max_fd; idx++) {
             // listen_fd here
-            if (socket_fd == idx) {
+            if (sock_fd == idx) {
                 continue;
             }
 
@@ -486,9 +487,9 @@ int main(int argc, char **argv)
     }
 
 EXIT:
-    if (-1 != socket_fd) {
-        close(socket_fd);
-        socket_fd = -1;
+    if (-1 != sock_fd) {
+        close(sock_fd);
+        sock_fd = -1;
     }
 
     if (-1 != conn_fd) {
