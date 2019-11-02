@@ -4,12 +4,15 @@
 #include "fxltype.h"
 #include "fxlthread.h"
 
+
 //#ifdef _LINUX_
 typedef int SOCKET;
 //#endif
 
+
 #define INVALID_SOCKET (-1)
 #define MAX_BUF_LEN 1024
+
 
 typedef void (*pFuncRcvDataCB)(s8 *pData, u16 wLen, void *pContent);
 
@@ -17,6 +20,7 @@ struct TIOBuffer
 {
     
 };
+
 
 class CTcpSocket
 {

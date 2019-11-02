@@ -1,6 +1,15 @@
 #include "tcpsocket.h"
 #include "common.h"
 
+
+#if !defined(SOL_TCP) && defined(IPPROTO_TCP)
+#define SOL_TCP IPPROTO_TCP
+#endif
+#if !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE)
+#define TCP_KEEPIDLE TCP_KEEPALIVE
+#endif
+
+
 CTcpSocket::CTcpSocket()
 {
     m_nSocket = INVALID_SOCKET;
@@ -144,7 +153,7 @@ FUNCALLBACK CTcpSocket::RcvThd(void *p)
         pTs->RcvLoop();
     }
 
-    
+    return NULL;
 }
 
 void CTcpSocket::RcvLoop()
