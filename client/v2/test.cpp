@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include "tcpsocket.h"
 #include "common.h"
@@ -22,12 +23,15 @@ int main(int argc, char **argv)
         return -1;
     }
     
-    u32 dwIp = Ipctol(argv[1]);
-    cout << dwIp << endl;
+   strcpy(achServerIp, argv[1]);
+    cout << achServerIp << endl;
+   // u32 dwIp = Ipctol(achServerIp);
+   // u32 dwIp = Ipctol(argv[1]);
+    //cout << dwIp << endl;
     nPort = atoi(argv[2]);
     cout << nPort << endl;
 
-    BOOL32 bRet = pCTcpSocket->Create(dwIp, nPort, RecvData, (void*)pCTcpSocket);
+    BOOL32 bRet = pCTcpSocket->Create(achServerIp, nPort, RecvData, (void*)pCTcpSocket);
     if(!bRet)
     {
         cout << "connect server failed!!!\n";
@@ -36,8 +40,12 @@ int main(int argc, char **argv)
 
     s8 achTmp[30] = "my name is client";
     pCTcpSocket->SendMsg(achTmp, strlen(achTmp));
-    delete pCTcpSocket;
-    pCTcpSocket = NULL;
+
+    //pCTcpSocket->Destroy();
+    //delete pCTcpSocket;
+    //pCTcpSocket = NULL;
+
+    sleep(200);
 
     return 0;
 }

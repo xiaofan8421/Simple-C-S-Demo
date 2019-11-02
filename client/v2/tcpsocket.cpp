@@ -17,7 +17,7 @@ CTcpSocket::~CTcpSocket()
     Destroy();
 }
 
-BOOL32 CTcpSocket::Create(u32 dwSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvDataCb, void *pContent)
+BOOL32 CTcpSocket::Create(const s8 *szSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvDataCb, void *pContent)
 {
     m_pRcvDataCB = pRcvDataCb;
     m_pUsrContent = pContent;
@@ -34,6 +34,7 @@ BOOL32 CTcpSocket::Create(u32 dwSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvDataCb,
     tServer.sin_family = AF_INET;
     tServer.sin_port = htons(dwSvrPort);
     //tServer.sin_addr.s_addr = dwSvrIp;
+    inet_pton(AF_INET, szSvrIp, &tServer.sin_addr.s_addr);
 
     s32 nRet = connect(m_nSocket, (struct sockaddr *)&tServer, sizeof(tServer));
     if(INVALID_SOCKET == nRet)
@@ -44,6 +45,7 @@ BOOL32 CTcpSocket::Create(u32 dwSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvDataCb,
         return FALSE;
     }
 
+    printf("connect success! \n");
     SetSocketOption(m_nSocket, TRUE);
 
     m_bRun = TRUE;
@@ -51,6 +53,7 @@ BOOL32 CTcpSocket::Create(u32 dwSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvDataCb,
     if(NULL == m_hThd)
     {
         m_bRun = FALSE;
+        printf("create thread failed!!! \n");
         Destroy();
         return FALSE;
     }
@@ -84,6 +87,7 @@ BOOL32 CTcpSocket::SendMsg(const s8 *pCmd, u16 wLen)
         return FALSE;
     }
 
+    printf("snd %d msgs:%s\n", wLen, pCmd);
     s32 nRet = send(m_nSocket, pCmd, wLen, 0);
     if(nRet != wLen)
     {
@@ -118,7 +122,7 @@ BOOL32 CTcpSocket::SetSocketOption(SOCKET socket, BOOL32 bNonBlock)
     
     //下面三个设置内部的TCP心跳包，不靠谱，后期改为应用层的心跳包
     s32 nSec = 10;
-    //setsockopt(socket, IPPROTO_TCP, TCP_KEEPIDLE, &nSec, sizeof nSec);
+    setsockopt(socket, IPPROTO_TCP, TCP_KEEPIDLE, &nSec, sizeof nSec);
     nSec = 3;
     setsockopt(socket, IPPROTO_TCP, TCP_KEEPINTVL, &nSec, sizeof nSec);
     setsockopt(socket, IPPROTO_TCP, TCP_KEEPCNT, &nSec, sizeof nSec);
@@ -140,7 +144,7 @@ FUNCALLBACK CTcpSocket::RcvThd(void *p)
         pTs->RcvLoop();
     }
 
-	return 0;    
+    
 }
 
 void CTcpSocket::RcvLoop()
@@ -212,8 +216,6 @@ void CTcpSocket::RcvData(const u8 *pBuf, s32 nLen)
 /*
 int main(int argc, char **argv)
 {
-
-
     return 0;
 }
 */
