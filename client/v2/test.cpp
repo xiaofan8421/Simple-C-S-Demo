@@ -22,9 +22,6 @@ int main(int argc, char **argv)
         return -1;
     }
     
-   // strcpy(achServerIp, argv[1]);
- //   cout << achServerIp << endl;
-   // u32 dwIp = Ipctol(achServerIp);
     u32 dwIp = Ipctol(argv[1]);
     cout << dwIp << endl;
     nPort = atoi(argv[2]);

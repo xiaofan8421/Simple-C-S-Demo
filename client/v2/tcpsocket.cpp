@@ -32,8 +32,8 @@ BOOL32 CTcpSocket::Create(u32 dwSvrIp, u16 dwSvrPort, pFuncRcvDataCB pRcvDataCb,
     struct sockaddr_in tServer;
     memset(&tServer, 0, sizeof(tServer));
     tServer.sin_family = AF_INET;
-    tServer.sin_port = dwSvrPort;
-    tServer.sin_addr.s_addr = dwSvrIp;
+    tServer.sin_port = htons(dwSvrPort);
+    //tServer.sin_addr.s_addr = dwSvrIp;
 
     s32 nRet = connect(m_nSocket, (struct sockaddr *)&tServer, sizeof(tServer));
     if(INVALID_SOCKET == nRet)
@@ -118,7 +118,7 @@ BOOL32 CTcpSocket::SetSocketOption(SOCKET socket, BOOL32 bNonBlock)
     
     //下面三个设置内部的TCP心跳包，不靠谱，后期改为应用层的心跳包
     s32 nSec = 10;
-    setsockopt(socket, IPPROTO_TCP, TCP_KEEPIDLE, &nSec, sizeof nSec);
+    //setsockopt(socket, IPPROTO_TCP, TCP_KEEPIDLE, &nSec, sizeof nSec);
     nSec = 3;
     setsockopt(socket, IPPROTO_TCP, TCP_KEEPINTVL, &nSec, sizeof nSec);
     setsockopt(socket, IPPROTO_TCP, TCP_KEEPCNT, &nSec, sizeof nSec);
@@ -140,7 +140,7 @@ FUNCALLBACK CTcpSocket::RcvThd(void *p)
         pTs->RcvLoop();
     }
 
-    
+	return 0;    
 }
 
 void CTcpSocket::RcvLoop()

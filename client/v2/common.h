@@ -18,7 +18,6 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/select.h>
-#include <sys/epoll.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
