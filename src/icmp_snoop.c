@@ -40,6 +40,12 @@
 #define TEST_REMOTE_PORT2       50002
 
 
+// ICMP back MSG format
+/*
+    New IP Header + ICMP Message (ICMP header + Original IP Header + Oirginal TCP/UDP Header)
+*/
+
+
 // rx_icmp thread args
 typedef struct rx_icmp_err_info {
     volatile bool *running;
