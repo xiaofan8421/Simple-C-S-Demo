@@ -362,6 +362,11 @@ int main(int argc, char **argv)
         goto EXIT;
     }
 
+    ret = set_socket_option(sock_fd);
+    if (-1 == ret) {
+        goto EXIT;
+    }
+
     if (is_server) {
         struct sockaddr_in addr4;
         memset(&addr4, 0, sizeof(addr4));
